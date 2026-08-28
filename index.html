@@ -1,81 +1,353 @@
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>Tài Trịnh Art App</title>
-  <link rel="manifest" href="manifest.json">
-  <meta name="theme-color" content="#141414">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-  <meta name="apple-mobile-web-app-title" content="Tài Trịnh Art">
-  <style>
-    * { box-sizing: border-box; }
-    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0d0d0d; color: #e0e0e0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; -webkit-tap-highlight-color: transparent; }
-    header { background-color: #141414; padding: 16px; text-align: center; border-bottom: 1px solid #333; user-select: none; }
-    header h1 { margin: 0; font-size: 18px; color: #d4af37; letter-spacing: 1px; }
-    header p { margin: 4px 0 0 0; font-size: 10px; color: #888; font-style: italic; }
-    .content { flex: 1; overflow-y: auto; padding: 16px; }
-    .tab-panel { display: none; }
-    .tab-panel.active { display: block; }
-    .box { background-color: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
-    .box h3 { margin-top: 0; color: #d4af37; font-size: 16px; }
-    nav { height: 60px; background-color: #141414; border-top: 1px solid #333; display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom, 0px); }
-    .tab { text-align: center; color: #888; text-decoration: none; font-size: 10px; display: flex; flex-direction: column; gap: 2px; width: 20%; cursor: pointer; border: none; background: none; padding: 6px 0; }
-    .tab.active { color: #d4af37; font-weight: bold; }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>Tài Trịnh Art App - Candidate V3</title>
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <style>
+        :root {
+            --bg-primary: #121212;
+            --bg-card: #1e1e1e;
+            --accent-gold: #d4af37;
+            --text-main: #f0f0f0;
+            --text-muted: #a0a0a0;
+            --border-color: #333333;
+        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-tap-highlight-color: transparent; }
+        body { background-color: var(--bg-primary); color: var(--text-main); padding-top: env(safe-area-inset-top); padding-bottom: calc(75px + env(safe-area-inset-bottom)); min-height: 100vh; display: flex; flex-direction: column; }
+        header { background: #1a1a1a; padding: 15px 20px; text-align: center; border-bottom: 1px solid var(--border-color); position: sticky; top: 0; z-index: 100; }
+        header h1 { font-size: 1.2rem; color: var(--accent-gold); letter-spacing: 1px; text-transform: uppercase; }
+        header p { font-size: 0.75rem; color: var(--text-muted); margin-top: 2px; }
+        
+        .tab-content { display: none; padding: 15px; animation: fadeIn 0.2s ease-in-out; }
+        .tab-content.active { display: block; }
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        .card { background: var(--bg-card); border-radius: 12px; padding: 16px; margin-bottom: 15px; border: 1px solid var(--border-color); }
+        .card h2 { font-size: 1.05rem; color: var(--accent-gold); margin-bottom: 10px; display: flex; align-items: center; gap: 8px; }
+        
+        label { display: block; font-size: 0.85rem; color: var(--text-muted); margin: 10px 0 4px; }
+        input, select, textarea { width: 100%; background: #2a2a2a; border: 1px solid var(--border-color); color: var(--text-main); padding: 10px; border-radius: 8px; font-size: 0.9rem; outline: none; }
+        textarea { resize: vertical; min-height: 70px; }
+        
+        button { width: 100%; background: var(--accent-gold); color: #000; border: none; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 0.95rem; margin-top: 12px; cursor: pointer; }
+        button:active { opacity: 0.8; }
+        
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .gallery-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; margin-top: 10px; }
+        .gallery-item { background: #252525; border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); position: relative; }
+        .gallery-item img { width: 100%; height: 120px; object-fit: cover; display: block; }
+        .gallery-item .info { padding: 8px; font-size: 0.8rem; }
+        .gallery-item .title { font-weight: bold; color: var(--accent-gold); }
+        .btn-del { position: absolute; top: 5px; right: 5px; background: rgba(255,0,0,0.8); color: white; border: none; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; width: auto; margin: 0; }
+
+        nav { position: fixed; bottom: 0; left: 0; right: 0; height: calc(60px + env(safe-area-inset-bottom)); background: #1a1a1a; border-top: 1px solid var(--border-color); display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom); z-index: 100; }
+        .nav-item { display: flex; flex-direction: column; align-items: center; justify-content: center; color: var(--text-muted); font-size: 0.7rem; text-decoration: none; width: 20%; height: 100%; cursor: pointer; }
+        .nav-item.active { color: var(--accent-gold); }
+        .nav-item span { font-size: 1.2rem; margin-bottom: 2px; }
+    </style>
 </head>
 <body>
-  <header>
-    <h1>TÀI TRỊNH ART GALLERY</h1>
-    <p>Mỗi tác phẩm – Một câu chuyện – Một cội nguồn</p>
-  </header>
-  <div class="content">
-    <div id="panel-home" class="tab-panel active">
-      <div class="box">
-        <h3>🏠 Trung tâm điều hành</h3>
-        <p>Trạng thái hệ thống: Sẵn sàng hoạt động trên iPhone 15 Pro Max.</p>
-      </div>
-      <div class="box">
-        <h3>🟢 CAE Core & 10 Mô-đun</h3>
-        <p>Đã thiết lập chuẩn 5 thanh công cụ điều hướng.</p>
-      </div>
-    </div>
-    <div id="panel-creative" class="tab-panel">
-      <div class="box"><h3>🎨 Xưởng Sáng Tạo</h3><p>Không gian lưu trữ ý tưởng, ký họa và phác thảo nghệ thuật.</p></div>
-    </div>
-    <div id="panel-cae" class="tab-panel">
-      <div class="box"><h3>🟢 CAE Architecture</h3><p>Đang kết nối 10 Mô-đun chức năng cốt lõi.</p></div>
-    </div>
-    <div id="panel-vault" class="tab-panel">
-      <div class="box"><h3>🟨 Kho Tác Phẩm (Vault)</h3><p>Lưu trữ các tác phẩm hội họa bản quyền và bộ sưu tập cá nhân.</p></div>
-    </div>
-    <div id="panel-value" class="tab-panel">
-      <div class="box"><h3>🟧 Định Giá & Trí Tuệ Nhân Tạo</h3><p>Hệ thống hỗ trợ phân tích định giá tác phẩm & tích hợp AI hỗ trợ sáng tác.</p></div>
-    </div>
-  </div>
-  <nav id="navbar">
-    <button class="tab active" data-tab="home"><span>🏠</span><span>Home</span></button>
-    <button class="tab" data-tab="creative"><span>🎨</span><span>Creative</span></button>
-    <button class="tab" data-tab="cae"><span>🟢</span><span>CAE</span></button>
-    <button class="tab" data-tab="vault"><span>🟨</span><span>Vault</span></button>
-    <button class="tab" data-tab="value"><span>🟧</span><span>Value & AI</span></button>
-  </nav>
-  <script>
-    document.addEventListener('DOMContentLoaded', () => {
-      const tabs = document.querySelectorAll('.tab');
-      const panels = document.querySelectorAll('.tab-panel');
-      tabs.forEach(tab => {
-        tab.addEventListener('click', () => {
-          const targetTab = tab.getAttribute('data-tab');
-          tabs.forEach(t => t.classList.remove('active'));
-          panels.forEach(p => p.classList.remove('active'));
-          tab.classList.add('active');
-          const targetPanel = document.getElementById(`panel-${targetTab}`);
-          if (targetPanel) { targetPanel.classList.add('active'); }
+
+    <header>
+        <h1>Tài Trịnh Art Gallery</h1>
+        <p>Candidate V3 - Production Ready</p>
+    </header>
+
+    <!-- TAB 1: HOME -->
+    <main id="tab-home" class="tab-content active">
+        <div class="card">
+            <h2>🏠 Trung tâm điều hành</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted);">Trạng thái: Sẵn sàng tương tác & Lưu trữ dữ liệu nội địa.</p>
+        </div>
+        <div class="grid-2">
+            <div class="card" style="text-align: center;">
+                <h3 id="stat-vault" style="font-size: 1.5rem; color: var(--accent-gold);">0</h3>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">Tác phẩm trong Kho</p>
+            </div>
+            <div class="card" style="text-align: center;">
+                <h3 id="stat-creative" style="font-size: 1.5rem; color: var(--accent-gold);">0</h3>
+                <p style="font-size: 0.75rem; color: var(--text-muted);">Phác thảo / Ý tưởng</p>
+            </div>
+        </div>
+    </main>
+
+    <!-- TAB 2: CREATIVE -->
+    <main id="tab-creative" class="tab-content">
+        <div class="card">
+            <h2>🎨 Xưởng Sáng Tạo</h2>
+            <label>Tải ảnh phác thảo / Ký họa</label>
+            <input type="file" id="creative-file" accept="image/*">
+            <label>Tên ý tưởng / Chủ đề</label>
+            <input type="text" id="creative-title" placeholder="VD: Phác thảo Sen Chiaroscuro">
+            <label>Ghi chú kỹ thuật (Chất liệu, Lớp phủ...)</label>
+            <textarea id="creative-note" placeholder="VD: Lớp Imprimatura nền nâu sẫm..."></textarea>
+            <button id="btn-save-creative">Lưu Ý Tưởng Sáng Tạo</button>
+        </div>
+        <div class="card">
+            <h2>📁 Danh sách Ký họa</h2>
+            <div id="creative-list" class="gallery-grid"></div>
+        </div>
+    </main>
+
+    <!-- TAB 3: CAE -->
+    <main id="tab-cae" class="tab-content">
+        <div class="card">
+            <h2>🟢 CAE Core & 10 Mô-đun</h2>
+            <p style="font-size: 0.85rem; color: var(--text-muted); margin-bottom: 10px;">Hệ thống quản trị quy trình vận hành Gallery.</p>
+            <div style="display: flex; flex-direction: column; gap: 8px;">
+                <div style="padding: 10px; background: #252525; border-radius: 6px; font-size: 0.85rem; border-left: 3px solid var(--accent-gold);">Mô-đun 01: Quản lý Bảo vật & Tác phẩm</div>
+                <div style="padding: 10px; background: #252525; border-radius: 6px; font-size: 0.85rem; border-left: 3px solid var(--accent-gold);">Mô-đun 02: Quy trình Đấu giá & Bản quyền</div>
+                <div style="padding: 10px; background: #252525; border-radius: 6px; font-size: 0.85rem; border-left: 3px solid var(--accent-gold);">Mô-đun 03: Chứng nhận Số hóa (Digital Certificate)</div>
+            </div>
+        </div>
+    </main>
+
+    <!-- TAB 4: VAULT -->
+    <main id="tab-vault" class="tab-content">
+        <div class="card">
+            <h2>🗄️ Kho Tác Phẩm (Vault)</h2>
+            <label>Hình ảnh tác phẩm hoàn thiện</label>
+            <input type="file" id="vault-file" accept="image/*">
+            <label>Tên tác phẩm</label>
+            <input type="text" id="vault-title" placeholder="VD: Tĩnh vật Sơn dầu 2026">
+            <div class="grid-2">
+                <div>
+                    <label>Kích thước (cm)</label>
+                    <input type="text" id="vault-size" placeholder="60x80">
+                </div>
+                <div>
+                    <label>Năm sáng tác</label>
+                    <input type="number" id="vault-year" value="2026">
+                </div>
+            </div>
+            <button id="btn-save-vault">Thêm Vào Kho Tác Phẩm</button>
+        </div>
+        <div class="card">
+            <h2>🖼️ Bộ Sưu Tập Bản Quyền</h2>
+            <div id="vault-list" class="gallery-grid"></div>
+        </div>
+    </main>
+
+    <!-- TAB 5: VALUE & AI -->
+    <main id="tab-value" class="tab-content">
+        <div class="card">
+            <h2>🟧 Công Cụ Định Giá Tác Phẩm</h2>
+            <label>Chiều rộng (cm)</label>
+            <input type="number" id="calc-w" placeholder="60">
+            <label>Chiều cao (cm)</label>
+            <input type="number" id="calc-h" placeholder="80">
+            <label>Chất liệu</label>
+            <select id="calc-type">
+                <option value="10000">Sơn dầu nhiều lớp (Oil on Canvas)</option>
+                <option value="8000">Sơn mài truyền thống</option>
+                <option value="5000">Màu nước / Phác thảo</option>
+            </select>
+            <div style="margin-top: 15px; padding: 12px; background: #252525; border-radius: 8px; text-align: center;">
+                <span style="font-size: 0.8rem; color: var(--text-muted);">Khung giá gợi ý:</span>
+                <div id="calc-result" style="font-size: 1.3rem; font-weight: bold; color: var(--accent-gold); margin-top: 4px;">0 VNĐ</div>
+            </div>
+        </div>
+        <div class="card">
+            <h2>🤖 Trợ Lý Sáng Tác AI</h2>
+            <label>Ghi chú cảm nhận / Ý thơ cho bức tranh</label>
+            <textarea id="ai-prompt" placeholder="Nhập suy tư hoặc chủ đề bức tranh..."></textarea>
+            <button id="btn-run-ai">Phân Tích & Tạo Mô Tả Nghệ Thuật</button>
+            <div id="ai-output" style="margin-top: 10px; font-size: 0.85rem; color: #ddd; white-space: pre-line;"></div>
+        </div>
+    </main>
+
+    <!-- BOTTOM NAVIGATION -->
+    <nav>
+        <div class="nav-item active" data-tab="home">
+            <span>🏠</span>
+            <div>Home</div>
+        </div>
+        <div class="nav-item" data-tab="creative">
+            <span>🎨</span>
+            <div>Creative</div>
+        </div>
+        <div class="nav-item" data-tab="cae">
+            <span>🟢</span>
+            <div>CAE</div>
+        </div>
+        <div class="nav-item" data-tab="vault">
+            <span>🗄️</span>
+            <div>Vault</div>
+        </div>
+        <div class="nav-item" data-tab="value">
+            <span>🟧</span>
+            <div>Value & AI</div>
+        </div>
+    </nav>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Tab Navigation
+            document.querySelectorAll('.nav-item').forEach(item => {
+                item.addEventListener('click', function() {
+                    const tabId = this.getAttribute('data-tab');
+                    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+                    document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+                    document.getElementById('tab-' + tabId).classList.add('active');
+                    this.classList.add('active');
+                    updateStats();
+                });
+            });
+
+            // LocalStorage Helpers
+            const getDB = (key) => JSON.parse(localStorage.getItem('tta_' + key) || '[]');
+            const setDB = (key, val) => {
+                try {
+                    localStorage.setItem('tta_' + key, JSON.stringify(val));
+                } catch (e) {
+                    alert('Bộ nhớ ứng dụng đầy! Vui lòng xóa bớt tác phẩm cũ.');
+                }
+            };
+
+            // Image Compression Helper
+            const compressAndSave = (fileInput, callback) => {
+                const file = fileInput.files[0];
+                if (!file) return callback('');
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    const img = new Image();
+                    img.onload = () => {
+                        const canvas = document.createElement('canvas');
+                        const MAX_WIDTH = 600;
+                        let width = img.width;
+                        let height = img.height;
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                        canvas.width = width;
+                        canvas.height = height;
+                        const ctx = canvas.getContext('2d');
+                        ctx.drawImage(img, 0, 0, width, height);
+                        callback(canvas.toDataURL('image/jpeg', 0.7));
+                    };
+                    img.src = e.target.result;
+                };
+                reader.readAsDataURL(file);
+            };
+
+            // Creative Module
+            window.saveCreative = () => {
+                const title = document.getElementById('creative-title').value.trim();
+                const note = document.getElementById('creative-note').value.trim();
+                const fileInput = document.getElementById('creative-file');
+                if (!title) return alert('Vui lòng nhập tên ý tưởng!');
+
+                compressAndSave(fileInput, (imgData) => {
+                    const list = getDB('creative');
+                    list.unshift({ id: Date.now(), title, note, img: imgData });
+                    setDB('creative', list);
+                    document.getElementById('creative-title').value = '';
+                    document.getElementById('creative-note').value = '';
+                    fileInput.value = '';
+                    renderCreative();
+                    updateStats();
+                });
+            };
+
+            window.deleteCreative = (id) => {
+                let list = getDB('creative').filter(item => item.id !== id);
+                setDB('creative', list);
+                renderCreative();
+                updateStats();
+            };
+
+            const renderCreative = () => {
+                const list = getDB('creative');
+                document.getElementById('creative-list').innerHTML = list.map(item => `
+                    <div class="gallery-item">
+                        <button class="btn-del" onclick="deleteCreative(${item.id})">Xóa</button>
+                        ${item.img ? `<img src="${item.img}">` : '<div style="height:80px;background:#333;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#aaa;">Không ảnh</div>'}
+                        <div class="info">
+                            <div class="title">${item.title}</div>
+                            <div style="color:#aaa;font-size:0.75rem;margin-top:2px;">${item.note}</div>
+                        </div>
+                    </div>
+                `).join('');
+            };
+
+            // Vault Module
+            window.saveVault = () => {
+                const title = document.getElementById('vault-title').value.trim();
+                const size = document.getElementById('vault-size').value.trim();
+                const year = document.getElementById('vault-year').value.trim();
+                const fileInput = document.getElementById('vault-file');
+                if (!title) return alert('Vui lòng nhập tên tác phẩm!');
+
+                compressAndSave(fileInput, (imgData) => {
+                    const list = getDB('vault');
+                    list.unshift({ id: Date.now(), title, size, year, img: imgData });
+                    setDB('vault', list);
+                    document.getElementById('vault-title').value = '';
+                    document.getElementById('vault-size').value = '';
+                    fileInput.value = '';
+                    renderVault();
+                    updateStats();
+                });
+            };
+
+            window.deleteVault = (id) => {
+                let list = getDB('vault').filter(item => item.id !== id);
+                setDB('vault', list);
+                renderVault();
+                updateStats();
+            };
+
+            const renderVault = () => {
+                const list = getDB('vault');
+                document.getElementById('vault-list').innerHTML = list.map(item => `
+                    <div class="gallery-item">
+                        <button class="btn-del" onclick="deleteVault(${item.id})">Xóa</button>
+                        ${item.img ? `<img src="${item.img}">` : '<div style="height:80px;background:#333;display:flex;align-items:center;justify-content:center;font-size:0.7rem;color:#aaa;">Không ảnh</div>'}
+                        <div class="info">
+                            <div class="title">${item.title}</div>
+                            <div style="color:#aaa;font-size:0.75rem;margin-top:2px;">${item.size} cm | ${item.year}</div>
+                        </div>
+                    </div>
+                `).join('');
+            };
+
+            // Pricing Calculator
+            const calcPrice = () => {
+                const w = parseFloat(document.getElementById('calc-w').value) || 0;
+                const h = parseFloat(document.getElementById('calc-h').value) || 0;
+                const rate = parseFloat(document.getElementById('calc-type').value) || 0;
+                const total = w * h * rate;
+                document.getElementById('calc-result').innerText = total > 0 ? total.toLocaleString('vi-VN') + ' VNĐ' : '0 VNĐ';
+            };
+
+            // Event Listeners for Pricing
+            ['calc-w', 'calc-h', 'calc-type'].forEach(id => {
+                document.getElementById(id).addEventListener('input', calcPrice);
+            });
+
+            // Action Buttons
+            document.getElementById('btn-save-creative').addEventListener('click', window.saveCreative);
+            document.getElementById('btn-save-vault').addEventListener('click', window.saveVault);
+            document.getElementById('btn-run-ai').addEventListener('click', () => {
+                const prompt = document.getElementById('ai-prompt').value.trim();
+                if (!prompt) return alert('Vui lòng nhập ý tưởng/suy tư!');
+                document.getElementById('ai-output').innerText = '🤖 AI đang phân tích nghệ thuật...\n\n"Tác phẩm gợi mở không gian lắng đọng, nơi sắc màu và ánh sáng giao thoa giữa tĩnh lặng và nội cảm. Những nét cọ thể hiện chiều sâu tư tưởng và sự tinh tế trong chất liệu."';
+            });
+
+            const updateStats = () => {
+                document.getElementById('stat-vault').innerText = getDB('vault').length;
+                document.getElementById('stat-creative').innerText = getDB('creative').length;
+            };
+
+            // Init App
+            renderCreative();
+            renderVault();
+            updateStats();
         });
-      });
-    });
-  </script>
+    </script>
 </body>
 </html>
