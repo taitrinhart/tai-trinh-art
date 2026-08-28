@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>Tài Trịnh Art App</title>
+  <link rel="manifest" href="manifest.json">
+  <meta name="theme-color" content="#141414">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="Tài Trịnh Art">
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; background-color: #0d0d0d; color: #e0e0e0; display: flex; flex-direction: column; height: 100vh; overflow: hidden; -webkit-tap-highlight-color: transparent; }
+    header { background-color: #141414; padding: 16px; text-align: center; border-bottom: 1px solid #333; user-select: none; }
+    header h1 { margin: 0; font-size: 18px; color: #d4af37; letter-spacing: 1px; }
+    header p { margin: 4px 0 0 0; font-size: 10px; color: #888; font-style: italic; }
+    .content { flex: 1; overflow-y: auto; padding: 16px; }
+    .tab-panel { display: none; }
+    .tab-panel.active { display: block; }
+    .box { background-color: #1a1a1a; border: 1px solid #333; border-radius: 8px; padding: 16px; margin-bottom: 16px; }
+    .box h3 { margin-top: 0; color: #d4af37; font-size: 16px; }
+    nav { height: 60px; background-color: #141414; border-top: 1px solid #333; display: flex; justify-content: space-around; align-items: center; padding-bottom: env(safe-area-inset-bottom, 0px); }
+    .tab { text-align: center; color: #888; text-decoration: none; font-size: 10px; display: flex; flex-direction: column; gap: 2px; width: 20%; cursor: pointer; border: none; background: none; padding: 6px 0; }
+    .tab.active { color: #d4af37; font-weight: bold; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>TÀI TRỊNH ART GALLERY</h1>
+    <p>Mỗi tác phẩm – Một câu chuyện – Một cội nguồn</p>
+  </header>
+  <div class="content">
+    <div id="panel-home" class="tab-panel active">
+      <div class="box">
+        <h3>🏠 Trung tâm điều hành</h3>
+        <p>Trạng thái hệ thống: Sẵn sàng hoạt động trên iPhone 15 Pro Max.</p>
+      </div>
+      <div class="box">
+        <h3>🟢 CAE Core & 10 Mô-đun</h3>
+        <p>Đã thiết lập chuẩn 5 thanh công cụ điều hướng.</p>
+      </div>
+    </div>
+    <div id="panel-creative" class="tab-panel">
+      <div class="box"><h3>🎨 Xưởng Sáng Tạo</h3><p>Không gian lưu trữ ý tưởng, ký họa và phác thảo nghệ thuật.</p></div>
+    </div>
+    <div id="panel-cae" class="tab-panel">
+      <div class="box"><h3>🟢 CAE Architecture</h3><p>Đang kết nối 10 Mô-đun chức năng cốt lõi.</p></div>
+    </div>
+    <div id="panel-vault" class="tab-panel">
+      <div class="box"><h3>🟨 Kho Tác Phẩm (Vault)</h3><p>Lưu trữ các tác phẩm hội họa bản quyền và bộ sưu tập cá nhân.</p></div>
+    </div>
+    <div id="panel-value" class="tab-panel">
+      <div class="box"><h3>🟧 Định Giá & Trí Tuệ Nhân Tạo</h3><p>Hệ thống hỗ trợ phân tích định giá tác phẩm & tích hợp AI hỗ trợ sáng tác.</p></div>
+    </div>
+  </div>
+  <nav id="navbar">
+    <button class="tab active" data-tab="home"><span>🏠</span><span>Home</span></button>
+    <button class="tab" data-tab="creative"><span>🎨</span><span>Creative</span></button>
+    <button class="tab" data-tab="cae"><span>🟢</span><span>CAE</span></button>
+    <button class="tab" data-tab="vault"><span>🟨</span><span>Vault</span></button>
+    <button class="tab" data-tab="value"><span>🟧</span><span>Value & AI</span></button>
+  </nav>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const tabs = document.querySelectorAll('.tab');
+      const panels = document.querySelectorAll('.tab-panel');
+      tabs.forEach(tab => {
+        tab.addEventListener('click', () => {
+          const targetTab = tab.getAttribute('data-tab');
+          tabs.forEach(t => t.classList.remove('active'));
+          panels.forEach(p => p.classList.remove('active'));
+          tab.classList.add('active');
+          const targetPanel = document.getElementById(`panel-${targetTab}`);
+          if (targetPanel) { targetPanel.classList.add('active'); }
+        });
+      });
+    });
+  </script>
+</body>
+</html>
